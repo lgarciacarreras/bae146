@@ -7,10 +7,10 @@ import os
 import glob
 from fnmatch import fnmatch
 
-def read_146(filename, var=None, var_name=None, event=None, fsummary=None):
+def core(filename, var=None, event=None, fsummary=None):
     
     '''
-    data_cube = read_var(filename, var=None, var_name=None, run=None)
+    data_cube = core(filename, var=None, var_name=None, run=None)
 
     Read data from BAe146.
     var: common variable names (uses var2name function to find correct var_name).
@@ -26,8 +26,7 @@ def read_146(filename, var=None, var_name=None, event=None, fsummary=None):
     # READ variable, as well as coordinate data (lon/lat/time)
     #---------------
 
-    if var: 
-        var_name = reada.var2name(var)
+    var_name = reada.var2name(var)
 
     if var_name == 'derived':
         cube = reada.derived_146(filename, var)
@@ -110,9 +109,9 @@ def read_146(filename, var=None, var_name=None, event=None, fsummary=None):
 
     return cube
 
-def read_sonde(filename, var=None):
+def sonde(filename, var=None):
     '''
-    sonde_cube = read_sonde(filename, var=None)
+    sonde_cube = sonde(filename, var=None)
 
     Read dropsonde data. By default 'time' is the main coordinate,
     here it is switched to altitude, keeping time as an auxiliary coordinate
@@ -143,11 +142,11 @@ def read_sonde(filename, var=None):
     else:
         return cubelist[0]
 
-def derived_146(filename, var):
+def derived_variables(filename, var):
 
     if var == 'theta':
-        temp = reada.read_146(filename, var='temp')
-        pressure = reada.read_146(filename, var='pressure')
+        temp = reada.core(filename, var='temp')
+        pressure = reada.core(filename, var='pressure')
         pref = iris.coords.AuxCoord(1000.,
                                 long_name='reference_pressure',
                                 units='hPa')
@@ -230,7 +229,8 @@ def var2name(var=None):
 
     if not var: # print out all the available names
         print "Allowed variable names are:"
-        for i in names.itervalues(): print i
+        for i in names.iterkeys(): print i
+        return
     else:
 
         try:
