@@ -2,7 +2,6 @@ import numpy as np
 import iris
 from iris.coords import DimCoord, AuxCoord
 import read_aircraft as reada
-import atmospheric as atm
 import os
 import glob
 from fnmatch import fnmatch
