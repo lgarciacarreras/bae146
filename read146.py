@@ -1,7 +1,7 @@
 import numpy as np
 import iris
 from iris.coords import DimCoord, AuxCoord
-import read_aircraft as reada
+import read146 as reada
 import os
 import glob
 from fnmatch import fnmatch
