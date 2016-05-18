@@ -137,35 +137,38 @@ def x_y_path(filename, var=None, event='Run', # IMPORTANT inputs
     if fout:
         plt.savefig(fout)
 
-def sonde_tephi(filename, winds=False, fout=None):
+def sonde_tephi(filename, winds=False, nbarbs=50, fout=None):
     '''
     Plot tephigram from a dropsonde file.
     If wind==True (default False) also add wind barbs
+    nbarbs: approximate number of barbs to plot (default=50)
     Requires tephi python package
     '''
     import tephi
 
-    # READ data and convert into (alt, variable) tuples
+    # READ dropsonde data 
     temp = bae.read.sonde(filename, var='tdry')    
     tdew = bae.read.sonde(filename, var='dp')
-    pressure = bae.read.sonde(filename, var='pres')
 
     # remove missing (masked) data, as it creates problems with tephi
     valid = np.where((np.ma.getmaskarray(temp.data) == False) & 
                      (np.ma.getmaskarray(tdew.data) == False))
     
-    tplot = zip(pressure.data[valid], temp.data[valid])
-    tdplot = zip(pressure.data[valid], tdew.data[valid])
+    # generate list of (pressure, temp) required by tephi
+    tplot = zip(temp.coord('air_pressure').points[valid], temp.data[valid])
+    tdplot = zip(tdew.coord('air_pressure').points[valid], tdew.data[valid])
 
+    # repeat for winds if requested
     if winds:
         wsp = bae.read.sonde(filename, var='wspd')
         wdir = bae.read.sonde(filename, var='wdir')
         wvalid = np.where((np.ma.getmaskarray(wsp.data) == False) & 
                      (np.ma.getmaskarray(wdir.data) == False))
 
-        # need to thin out wind barbs to one every
+        windplot = zip(wsp.data[wvalid], wdir.data[wvalid], wsp.coord('air_pressure').points[wvalid])
 
-        windplot = zip(wsp.data[wvalid], wdir.data[wvalid], pressure.data[wvalid])
+        # limit windplot to length nbarbs
+        windplot = windplot[::len(windplot)/nbarbs]
 
     # PLOT
     fig = plt.figure()

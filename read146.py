@@ -122,19 +122,28 @@ def sonde(filename, var=None):
     # Read variable (all data if var==None)
     cubelist = iris.load(filename, var)
 
-    # Read altitude and remove masked data (e.g. when sonde is on the ground) from the cubelist
+    # Read altitude and pressure and remove masked data (e.g. when sonde is on the ground) from the cubelist
     alt = iris.load_cube(filename, 'altitude above MSL')
-    cubelist = iris.cube.CubeList([c[~alt.data.mask] for c in cubelist])
+    pres = iris.load_cube(filename, 'pres')
+    mask = alt.data.mask
 
-    # create altitude coordinate to be added to cube
-    altitude = DimCoord(alt[~alt.data.mask].data,
+    cubelist = iris.cube.CubeList([c[~mask] for c in cubelist])
+
+    # create pressure coordinate to be added to cube
+    pressure = DimCoord(pres[~mask].data,
+                        units=pres.units, var_name=pres.var_name,
+                        long_name=pres.long_name, standard_name='air_pressure')
+
+    # create altitude auxiliary coordinate to be added to cube
+    altitude = AuxCoord(alt[~mask].data,
                         units=alt.units, var_name=alt.var_name,
                         long_name=alt.long_name, standard_name='altitude')
  
     # add coordinate, and demote 'time' to an AuxCoord
     for c in cubelist:
         iris.util.demote_dim_coord_to_aux_coord(c, 'time')
-        c.add_dim_coord(altitude, 0)
+        c.add_dim_coord(pressure, 0)
+        c.add_aux_coord(altitude, 0)
     
     # if cubelist has only one element (i.e. var has been specified), just output the cube
     if len(cubelist) > 1:
