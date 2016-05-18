@@ -3,7 +3,7 @@ from iris import plot as iplt
 from matplotlib import pyplot as plt
 from mpl_toolkits.basemap import Basemap
 from matplotlib.collections import LineCollection
-import read146 as reada
+import bae146 as bae
 
 def line(filename, var=None, xvar='time', event='Run',  # IMPORTANT INPUTS
         fsummary=None, fout = None):   
@@ -22,7 +22,7 @@ def line(filename, var=None, xvar='time', event='Run',  # IMPORTANT INPUTS
     '''
 
 # Read data
-    cube = reada.read.core(filename, var=var, event=event, fsummary=fsummary)
+    cube = bae.read.core(filename, var=var, event=event, fsummary=fsummary)
 
     if xvar=='time': # use iris plot as time is the dimcoord (and gives better labelling)
         iplt.plot(cube, label=var+' : '+event)
@@ -39,7 +39,7 @@ def line(filename, var=None, xvar='time', event='Run',  # IMPORTANT INPUTS
         plt.savefig(fout)
         
 def x_alt_path(filename, var=None, xvar='longitude', altvar='alt', # IMPORTANT INPUTS
-        event='Run', fsummary=None,  # options for reada146.read.core
+        event='Run', fsummary=None,  # options for bae.read.core
         cmin=None, cmax=None, #plotting options
         fout=None):  
 
@@ -56,12 +56,12 @@ def x_alt_path(filename, var=None, xvar='longitude', altvar='alt', # IMPORTANT I
     '''
 
 # Read data and altitude
-    cube = reada.read.core(filename, var=var, event=event, fsummary=fsummary)
-    alt = reada.read.core(filename, var=altvar, event=event, fsummary=fsummary)
+    cube = bae.read.core(filename, var=var, event=event, fsummary=fsummary)
+    alt = bae.read.core(filename, var=altvar, event=event, fsummary=fsummary)
     x = cube.coord(xvar).points
 
     # create coloured line
-    lc = reada.plot.gen_contour_line(x, alt.data, cube.data, cmin=cmin, cmax=cmax)
+    lc = bae.plot.gen_contour_line(x, alt.data, cube.data, cmin=cmin, cmax=cmax)
 
     # Plot data
     fig = plt.figure()
@@ -85,7 +85,7 @@ def x_alt_path(filename, var=None, xvar='longitude', altvar='alt', # IMPORTANT I
 
 
 def x_y_path(filename, var=None, event='Run', # IMPORTANT inputs
-        fsummary=None, # options for reada.read.core
+        fsummary=None, # options for bae.read.core
         lonlim = (72,88), latlim=(22,30), cmin=None, cmax=None): # plotting options
 
     '''
@@ -100,7 +100,7 @@ def x_y_path(filename, var=None, event='Run', # IMPORTANT inputs
 
     '''
 
-    cube = reada.read.core(filename, var=var, event=event, fsummary=fsummary)
+    cube = bae.read.core(filename, var=var, event=event, fsummary=fsummary)
 
     # Generate map
     m = Basemap(llcrnrlon=lonlim[0], llcrnrlat=latlim[0], 
@@ -124,7 +124,7 @@ def x_y_path(filename, var=None, event='Run', # IMPORTANT inputs
     m.drawmeridians(np.arange(lon0, lon1, dl), labels=[0,1,0,1])
     
     # generate line collection which will apply the coloured line
-    lc = reada.plot.gen_contour_line(cube.coord('longitude').points,
+    lc = bae.plot.gen_contour_line(cube.coord('longitude').points,
                                 cube.coord('latitude').points,
                                 cube.data, cmin=cmin, cmax=cmax)
 
@@ -146,9 +146,9 @@ def sonde_tephi(filename, winds=False, fout=None):
     import tephi
 
     # READ data and convert into (alt, variable) tuples
-    temp = reada.read.sonde(filename, var='tdry')    
-    tdew = reada.read.sonde(filename, var='dp')
-    pressure = reada.read.sonde(filename, var='pres')
+    temp = bae.read.sonde(filename, var='tdry')    
+    tdew = bae.read.sonde(filename, var='dp')
+    pressure = bae.read.sonde(filename, var='pres')
 
     # remove missing (masked) data, as it creates problems with tephi
     valid = np.where((np.ma.getmaskarray(temp.data) == False) & 
@@ -158,8 +158,8 @@ def sonde_tephi(filename, winds=False, fout=None):
     tdplot = zip(pressure.data[valid], tdew.data[valid])
 
     if winds:
-        wsp = reada.read.sonde(filename, var='wspd')
-        wdir = reada.read.sonde(filename, var='wdir')
+        wsp = bae.read.sonde(filename, var='wspd')
+        wdir = bae.read.sonde(filename, var='wdir')
         wvalid = np.where((np.ma.getmaskarray(wsp.data) == False) & 
                      (np.ma.getmaskarray(wdir.data) == False))
 

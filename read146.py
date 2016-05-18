@@ -1,7 +1,8 @@
 import numpy as np
 import iris
 from iris.coords import DimCoord, AuxCoord
-import read146 as reada
+import bae146 as bae
+import atmospheric as atm
 import os
 import glob
 from fnmatch import fnmatch
@@ -25,10 +26,10 @@ def core(filename, var=None, event=None, fsummary=None):
     # READ variable, as well as coordinate data (lon/lat/time)
     #---------------
 
-    var_name = reada.var2name(var)
+    var_name = bae.read.var2name(var)
 
     if var_name == 'derived':
-        cube = reada.derived_146(filename, var)
+        cube = bae.read.derived_146(filename, var)
     else:
         cube = iris.load_cube(filename,iris.Constraint(cube_func = lambda c: c.var_name == var_name))
 
@@ -93,7 +94,7 @@ def core(filename, var=None, event=None, fsummary=None):
                 fsummary = fsummary[0]
 
 
-        start, end, event_name, height = reada.runtimes(fsummary=fsummary, event=event)
+        start, end, event_name, height = bae.read.runtimes(fsummary=fsummary, event=event)
 
         # check 'event' actually produces any output
         if start == []:
@@ -144,8 +145,8 @@ def sonde(filename, var=None):
 def derived_variables(filename, var):
 
     if var == 'theta':
-        temp = reada.core(filename, var='temp')
-        pressure = reada.core(filename, var='pressure')
+        temp = bae.read.core(filename, var='temp')
+        pressure = bae.read.core(filename, var='pressure')
         pref = iris.coords.AuxCoord(1000.,
                                 long_name='reference_pressure',
                                 units='hPa')
