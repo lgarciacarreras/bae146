@@ -1,0 +1,58 @@
+Scripts to read and plot data from the BAe 146 research aircraft. Uses the Iris package. This is just a rough description of what it includes. The package is divided between reading and plotting scripts (the plotting scripts don't require reading the data beforehand).
+
+Reading:
+
+bae146.read.core(filename, var=None, event=None, [fsummary=None]):
+loads the core aircraft datasets (works with both 1 and 32Hz data) and outputs a 1D Iris cube with time as the main coordinate, and latitude/longitude auxiliary coordinates. 
+'var' accepts both a string with a 'common' variable name (e.g. 'u' for horizontal wind, bae146.read.var2name() gives you the full list) or the netcdf var_name. Derived variables can also be included (calculated in bae146.read.derived_values), but at the moment I have only put in 'theta'.
+'event' lets you select specific runs, profiles or sonde times. This can be a string or list of strings to get multiple runs. Either specific runs can be extracted (e.g. event='Run 1') or all of one type (event = 'Run')
+The code uses the flight_summ* file to automatically determine 'event' times. By default it searches within the same folder as the data, but the file location can also be given explicitly as fsummary.
+
+bae146.read.sonde(filename, var=None):
+Similar to read.core but for dropsondes. Note that at the moment var only accepts the netcdf variable name (and these are different to the core dataset). To get a list of variable names call the function without specifying var (which automatically reads the entire netcdf).
+
+Plotting:
+
+bae146.plot.line(filename, var=None, xvar='time', event='Run', [fsummary=None, fout=None: 
+Plot a simple line plot of 'var' against xvar
+A label with var+event is added to each line, so plt.legend() can be called after multiple calls to line
+
+xvar = 'time', 'latitude' or 'longitude'.
+event = list of strings giving runs/profiles/sondes to be plotted. 
+Will plot from the start of the first one to the end of the last.
+Defaults to 'Run' (no number, so plot all runs).
+fout = filename to save figure to. Won't save the figure by default.
+ 
+
+bae146.plot.x_alt_path(filename, var=None, xvar='longitude', altvar='alt', 
+        event='Run', fsummary=None, cmin=None, cmax=None, fout=None):
+
+Plot a line of the aircraft path (x vs altitude) coloured by 'var'
+
+altvar = altitude variable used ('alt','palt','radalt','pressure')
+xvar = x variable ('longitude', 'latitude')
+event = list of strings giving runs/profiles/sondes to be plotted. 
+Will plot from the start of the first one to the end of the last.
+Defaults to 'Run' (no number, so plot all runs).
+cmin/cmax = min/max for the colorbar. Default is min/max of the data.
+fout = filename to save figure to. Won't save the figure by default.
+ 
+
+bae146.plot.x_y_path(filename, var=None, event='Run', 
+        fsummary=None, lonlim = (72,88), latlim=(22,30), cmin=None, cmax=None): 
+
+Plot the flight path coloured by variable var on a map.
+
+event = list of strings giving runs/profiles/sondes to be plotted. 
+Will plot from the start of the first one to the end of the last.
+Defaults to 'Run' (no number, so plot all runs).
+lonlim/latlim = map boundaries (defaults to northern India)
+cmin/cmax = min/max for the colorbar. Default is min/max of the data.
+fout = filename to save figure to. Won't save the figure by default.
+
+bae146.plot.sonde_tephi(filename, winds=False, nbarbs=50, fout=None): 
+Plot tephigram from a dropsonde file.
+If wind==True (default False) also add wind barbs
+nbarbs: approximate number of barbs to plot (default=50)
+Requires tephi python package
+
