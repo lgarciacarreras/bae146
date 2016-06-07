@@ -172,7 +172,7 @@ def sonde_tephi(filename, winds=False, nbarbs=50, fout=None):
 
     # PLOT
     fig = plt.figure()
-    tpg = tephi.Tephigram(figure=fig, anchor=[(1000,-20),(300,0)])
+    tpg = tephi.Tephigram(figure=fig)
     profile = tpg.plot(tplot, color='r')
     tpg.plot(tdplot, color='b')
     if winds: profile.barbs(windplot)
