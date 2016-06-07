@@ -28,7 +28,7 @@ def core(filename, var=None, event=None, fsummary=None):
     var_name = bae.read.var2name(var)
 
     if var_name == 'derived':
-        cube = bae.read.derived_146(filename, var)
+        cube = bae.read.derived_variables(filename, var)
     else:
         cube = iris.load_cube(filename,iris.Constraint(cube_func = lambda c: c.var_name == var_name))
 
