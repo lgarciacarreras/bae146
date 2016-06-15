@@ -6,7 +6,7 @@ from matplotlib.collections import LineCollection
 import bae146 as bae
 
 def line(filename, var=None, xvar='time', event='Run',  # IMPORTANT INPUTS
-        fsummary=None, fout = None):   
+        fsummary=None, fout = None, **kwargs):   
 
     '''
     line(filename, var=None, xvar='time', event='Run', [fout=None, fsummary=None])
@@ -19,15 +19,16 @@ def line(filename, var=None, xvar='time', event='Run',  # IMPORTANT INPUTS
     Will plot from the start of the first one to the end of the last.
     Defaults to 'Run' (no number, so plot all runs).
     fout = filename to save figure to. Won't save the figure by default.
+    **kwargs get input into the matplotlib plotting function
     '''
 
 # Read data
     cube = bae.read.core(filename, var=var, event=event, fsummary=fsummary)
 
     if xvar=='time': # use iris plot as time is the dimcoord (and gives better labelling)
-        iplt.plot(cube, label=var+' : '+event)
+        iplt.plot(cube, label=var+' : '+event, **kwargs)
     else:
-        plt.plot(cube.coord(xvar).points, cube.data, label=var+' : '+event)
+        plt.plot(cube.coord(xvar).points, cube.data, label=var+' : '+event, **kwargs)
 
     plt.xlabel(xvar)
     plt.ylabel(cube.name()+' / '+cube.units.symbol)
@@ -40,7 +41,7 @@ def line(filename, var=None, xvar='time', event='Run',  # IMPORTANT INPUTS
         
 def x_alt_path(filename, var=None, xvar='longitude', altvar='alt', # IMPORTANT INPUTS
         event='Run', fsummary=None,  # options for bae.read.core
-        cmin=None, cmax=None, #plotting options
+        cmin=None, cmax=None, cname='viridis', #plotting options
         fout=None):  
 
     '''
@@ -52,6 +53,7 @@ def x_alt_path(filename, var=None, xvar='longitude', altvar='alt', # IMPORTANT I
     Will plot from the start of the first one to the end of the last.
     Defaults to 'Run' (no number, so plot all runs).
     cmin/cmax = min/max for the colorbar. Default is min/max of the data.
+    cname = matplotlib color map name
     fout = filename to save figure to. Won't save the figure by default.
     '''
 
@@ -61,7 +63,7 @@ def x_alt_path(filename, var=None, xvar='longitude', altvar='alt', # IMPORTANT I
     x = cube.coord(xvar).points
 
     # create coloured line
-    lc = bae.plot.gen_contour_line(x, alt.data, cube.data, cmin=cmin, cmax=cmax)
+    lc = bae.plot.gen_contour_line(x, alt.data, cube.data, cmin=cmin, cmax=cmax, cmap=plt.get_cmap(cname))
 
     # Plot data
     fig = plt.figure()
@@ -87,7 +89,7 @@ def x_alt_path(filename, var=None, xvar='longitude', altvar='alt', # IMPORTANT I
 def x_y_path(filename, var=None, event='Run', # IMPORTANT inputs
         fsummary=None, # options for bae.read.core
         lonlim = (72,88), latlim=(22,30), cmin=None, cmax=None, # plotting options
-        fout=None): 
+        cname='viridis', fout=None): 
 
     '''
     Plot the flight path coloured by variable var on a map.
@@ -97,8 +99,8 @@ def x_y_path(filename, var=None, event='Run', # IMPORTANT inputs
     Defaults to 'Run' (no number, so plot all runs).
     lonlim/latlim = map boundaries (defaults to northern India)
     cmin/cmax = min/max for the colorbar. Default is min/max of the data.
+    cname = matplotlib color map name
     fout = filename to save figure to. Won't save the figure by default.
-
     '''
 
     cube = bae.read.core(filename, var=var, event=event, fsummary=fsummary)
@@ -127,7 +129,7 @@ def x_y_path(filename, var=None, event='Run', # IMPORTANT inputs
     # generate line collection which will apply the coloured line
     lc = bae.plot.gen_contour_line(cube.coord('longitude').points,
                                 cube.coord('latitude').points,
-                                cube.data, cmin=cmin, cmax=cmax)
+                                cube.data, cmin=cmin, cmax=cmax, cmap=plt.get_cmap(cname))
 
     # plot line, and add colour bar
     plt.gca().add_collection(lc)
@@ -182,7 +184,7 @@ def sonde_tephi(filename, winds=False, nbarbs=50, fout=None):
         plt.savefig(fout)
     
 
-def gen_contour_line(x, y, z, cmin=None, cmax=None):
+def gen_contour_line(x, y, z, cmin=None, cmax=None, cmap=plt.get_cmap('cubehelix_r')):
     '''
     Generate 'line collection' which allows plotting a 2d line coloured by a third variable z
     '''
@@ -192,7 +194,7 @@ def gen_contour_line(x, y, z, cmin=None, cmax=None):
 
     points = np.array([x, y]).T.reshape(-1, 1, 2)
     segments = np.concatenate([points[:-1], points[1:]], axis=1)
-    lc = LineCollection(segments, cmap=plt.get_cmap('Spectral'),
+    lc = LineCollection(segments, cmap=cmap,
                             norm=plt.Normalize(cmin,cmax))
 
     lc.set_array(z)
