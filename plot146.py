@@ -86,7 +86,8 @@ def x_alt_path(filename, var=None, xvar='longitude', altvar='alt', # IMPORTANT I
 
 def x_y_path(filename, var=None, event='Run', # IMPORTANT inputs
         fsummary=None, # options for bae.read.core
-        lonlim = (72,88), latlim=(22,30), cmin=None, cmax=None): # plotting options
+        lonlim = (72,88), latlim=(22,30), cmin=None, cmax=None, # plotting options
+        fout=None): 
 
     '''
     Plot the flight path coloured by variable var on a map.

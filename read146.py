@@ -9,7 +9,7 @@ from fnmatch import fnmatch
 def core(filename, var=None, event=None, fsummary=None):
     
     '''
-    data_cube = core(filename, var=None, var_name=None, run=None)
+    data_cube = core(filename, var=None, var_name=None, event=None)
 
     Read data from BAe146.
     var: common variable names (uses var2name function to find correct var_name).
@@ -118,8 +118,10 @@ def sonde(filename, var=None):
     If no var is specified, it will output everything
     '''
 
-    # Read variable (all data if var==None)
-    cubelist = iris.load(filename, var)
+    # get var from var2name_sonde
+    var_name = bae.read.var2name_sonde(var) 
+    # Read variable (all data if var_name==None)
+    cubelist = iris.load(filename, var_name)
 
     # Read altitude and pressure and remove masked data (e.g. when sonde is on the ground) from the cubelist
     alt = iris.load_cube(filename, 'altitude above MSL')
@@ -191,7 +193,7 @@ def runtimes(fsummary=None, event=None):
     # if present, convert times to seconds
     with open(fsummary, 'r') as f:
         for line in f:
-            if any(s in line for s in event):
+            if any(s in line[:50] for s in event):
                 # if event=Run 1, Run 10,11 etc. will also be output, so check for that first
                 if event[0] == 'Run 1' and fnmatch(line[17:36].strip(), 'Run 1[0-9]'): continue
 
@@ -247,6 +249,35 @@ def var2name(var=None):
             print var+' is not recognized as a valid standard variable name.'
             print 'Calling the function without arguments will print the list of available variables.'
             print 'Will now try and continue using "var" as a var_name variable'
+            name = var
+
+    return name
+
+def var2name_sonde(var=None):
+    '''
+    var_name = var2name_sonde(var=None)
+    Convert easy to remember variable names (e.g. 'u' for horizontal wind) into the appropriate var_name to be used for extraction
+    Names are equivalent to those for the core data. Many are missing as I don't know what they are.
+    A call without arguments will print out all the available names.
+    '''
+
+    names = {'u':'u_wind',
+             'v':'v_wind',
+             'w':'wspd',
+             'alt':'altitude above MSL', # gps altitude
+             'pressure':'pres', # air pressure
+             'temp':'tdry', # temperature
+             'tdew':'dp'
+             }
+    if not var: # print out all the available names
+        print "Allowed variable names are:"
+        for i in names.iterkeys(): print i
+        return
+    else:
+
+        try:
+            name = names[var]
+        except KeyError:
             name = var
 
     return name
