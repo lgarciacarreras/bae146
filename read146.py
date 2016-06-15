@@ -32,6 +32,9 @@ def core(filename, var=None, event=None, fsummary=None):
     else:
         cube = iris.load_cube(filename,iris.Constraint(cube_func = lambda c: c.var_name == var_name))
 
+    # mask if any NaNs present
+    cube.data = np.ma.masked_invalid(cube.data)
+    
     t = iris.load_cube(filename, 'time')
     lat = iris.load_cube(filename, 
                         iris.Constraint(cube_func=lambda c: c.var_name == 'LAT_GIN'))
