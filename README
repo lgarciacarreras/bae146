@@ -3,12 +3,14 @@ Scripts to read and plot data from the BAe 146 research aircraft. Uses the Iris 
 Reading:
 
 bae146.read.core(filename, var=None, event=None, [fsummary=None]):
+
 loads the core aircraft datasets (works with both 1 and 32Hz data) and outputs a 1D Iris cube with time as the main coordinate, and latitude/longitude auxiliary coordinates. 
-'var' accepts both a string with a 'common' variable name (e.g. 'u' for horizontal wind, bae146.read.var2name() gives you the full list) or the netcdf var_name. Derived variables can also be included (calculated in bae146.read.derived_values), but at the moment I have only put in 'theta'.
+'var' accepts both a string with a 'common' variable name, e.g. 'u' for horizontal wind (bae146.read.var2name() gives you the full list) or the netcdf var_name. Derived variables can also be included (calculated in bae146.read.derived_values), but at the moment I have only put in 'theta'.
 'event' lets you select specific runs, profiles or sonde times. This can be a string or list of strings to get multiple runs. Either specific runs can be extracted (e.g. event='Run 1') or all of one type (event = 'Run')
 The code uses the flight_summ* file to automatically determine 'event' times. By default it searches within the same folder as the data, but the file location can also be given explicitly as fsummary.
 
 bae146.read.sonde(filename, var=None):
+
 Similar to read.core but for dropsondes. Note that at the moment var only accepts the netcdf variable name (and these are different to the core dataset). To get a list of variable names call the function without specifying var (which automatically reads the entire netcdf).
 
 Plotting:
